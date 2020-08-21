@@ -1,6 +1,8 @@
 const express = require("express");
 const knex = require("knex");
 const db = require("../data/config");
+const { route } = require("../welcome/welcome-router");
+const { default: strictTransportSecurity } = require("helmet/dist/middlewares/strict-transport-security");
 const router = express.Router();
 
 router.get("/cars", async (req, res, next) => {
@@ -32,5 +34,28 @@ router.post("/cars", async (req, res, next) => {
     next(err);
   }
 });
+
+router.put("/cars/:id", async (req, res, next) => {
+    try{
+        await db("cars").update(req.body).where("id", req.params.id);
+
+        const car = await db("cars").where("id", req.params.id).first();
+
+        res.json(car);
+    } catch (err){
+        next(err);
+    }
+});
+
+
+router.delete("/cars/:id", async (req, res, next) => {
+    try{
+        await db("cars").where("id", req.params.id).del();
+        res.status(203).end();
+    } catch(err){
+        next(err);
+    }
+});
+
 
 module.exports = router;
